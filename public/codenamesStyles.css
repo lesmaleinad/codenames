@@ -1,0 +1,188 @@
+body, html{
+	text-align: center;
+	height: 100%;
+	font-family: 'Ubuntu', sans-serif;
+}
+#backdrop{
+	position:absolute;
+	overflow:hidden;
+	width:100%;
+	height:100%;
+	top: 0;
+	left: 0;
+	opacity: .25;
+	background-color: white;
+	z-index: -11
+}
+.header h1{
+	font-style: italic;
+	text-align: center;
+	max-width: 100%;
+}
+h1 span{
+margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+}
+
+.row{
+	height: 100%;
+	margin: 0;
+}
+.container{
+	height: 100%;
+	max-width:100%;
+	padding: 2rem;
+}
+.header, .head-content{
+	max-width: 100%;
+}
+
+.cp{
+	max-width:100%
+}
+
+.cardField{
+	max-width: 100%;
+	height:100%;
+	overflow: hidden;
+}
+
+.cardField p{
+	height: 20%;
+	margin-bottom: 0;
+}
+
+.cardField p .card-wrapper {
+  display: inline-grid;
+  perspective: 600px;
+	padding: 3px;
+	width: 20%;
+	height: 100%;
+}
+.card{
+	transform: translateY(0) rotateX(0);
+}
+
+
+.front span{
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+}
+
+.card-wrapper .card{
+	/* display:inline-grid; */
+	height: 100%;
+	width: 100%;
+	/* FLIP STUFF */
+	position: relative;
+	transform-origin: center top;
+    transition: transform 0.7s;
+    transition-timing-function: ease-in-out;
+    transform-style: preserve-3d;
+}
+
+.card-wrapper .card	.front, .card-wrapper .card .back {
+	
+	  border: 1px solid black;	
+	  border-radius: 5%;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+ 	transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+}
+
+.card-wrapper:hover .card .front, .card-wrapper:hover .card .back{
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+	
+}
+.card-wrapper .card .back {
+    transform: rotateX(-180deg);
+}
+
+.revealed .card {
+	transform: translateY(100%) rotateX(180deg);
+      }
+.error{
+	border: 1px solid rgba(245, 15, 15, 0.4);
+}
+#menu input{
+	border: 1px solid black
+}
+#menu-team, #menu-role{
+	max-width: 50%;
+	padding: 2% 0;
+	max-height: 400px;
+}
+.btn-group .btn{
+	width: 100%;
+		
+}
+
+#menu-submit{
+	margin-top: 2%;
+	max-height: 200px
+	
+}
+#menu-role span{
+	position: relative;
+	transform: translate(0);
+	transition: transform 1.2s;
+	width: 100%;
+}
+#menu-role .code{
+	transform: translate(-100%);
+	transition: transform 1.2s;
+}
+
+#menu-role .oper{
+	transform: translate(100%);
+	transition: transform 1.2s;
+}
+
+#menu-role span .btn{
+	height: 100%
+}
+#menu-role #menu-color{
+	position: absolute;
+	z-index: -1;
+	top: 0;
+	left: 0
+}
+
+.circle{
+	position: absolute;
+	border-radius: 100%;
+	width: 1px;
+	height: 1px;
+	z-index: -10
+}
+
+@media screen and (max-width: 1199px){
+	
+	#gameHeader {
+		max-width: 100%;
+	}
+
+	#codeDone{
+		max-width: 25%;
+	}
+}
+
+@media screen and (min-width: 1200px){
+	
+	#getCode {
+		max-width: 100%;
+	}
+
+	#codeDone{
+		max-width: 50%
+	}
+}
