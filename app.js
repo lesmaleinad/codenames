@@ -14,7 +14,7 @@ app.get('/', function(req, res){
 	res.render('index')
 })
 
-server.listen(3000, console.log('Starting CODENAMES on port 3000'))
+server.listen(process.env.PORT||3000, console.log('Starting CODENAMES on port 3000'))
 
 //GAME LOGIC
 
