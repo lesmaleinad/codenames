@@ -162,12 +162,14 @@ $('.cardField')
 	}
 })
 	.on('mouseenter', '.back', function(event){
-		console.log(event)
-		const card = $(this).closest('.card-wrapper');
+		const card = $(event.currentTarget).closest('.card-wrapper');
 
-		card.removeClass('revealed')
-			.on('mouseleave', ()=>{card.addClass('revealed')})
-});
+		card.removeClass('revealed');
+
+		card.mouseleave(function(){
+			!board.gameOver ? card.addClass('revealed') : card.off('mouseleave')
+		})
+	})
 
 // THE SUBMIT CODE BUTTON
 $('#submitCode')

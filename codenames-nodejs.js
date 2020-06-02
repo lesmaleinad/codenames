@@ -14,10 +14,10 @@ const game = {
 		wordList = [];
 		teamOne = {name: 'red', color: 'rgb(227, 23, 13)'};
 		teamTwo = {name: 'blue', color: 'rgb(56, 176, 222)'};
-		game.playerList = [{team: game.teamOne, role:'code', socket: undefined},
-				   {team: game.teamOne, role:'oper', socket: undefined},
-				   {team: game.teamTwo, role:'code', socket: undefined},
-				   {team: game.teamTwo, role:'oper', socket: undefined}];
+		game.playerList = [{team: game.teamOne, role:'code', sockets:[]},
+				   {team: game.teamOne, role:'oper', sockets: []},
+				   {team: game.teamTwo, role:'code', sockets: []},
+				   {team: game.teamTwo, role:'oper', sockets: []}];
 		game.over = false;
 		cardField.init()
 		
@@ -67,7 +67,7 @@ const game = {
 		// SEND EVERY CONNECTED PLAYER AN UPDATE
 		game.playerList.forEach(function(p){
 			// BUILD CURRENT CODE TEXT
-			if(!game.isCode){var codeText = game.currentPlayer.code+' '+ game.currentPlayer.maxGuesses} else game.currentPlayer.code = '';
+			const codeText = !game.isCode ? game.currentPlayer.code : '';
 			// IS IT YOUR TURN?
 			var turn = ((game.isCode === (p.role === 'code')) && (game.isTeamOne === (p.team ===  game.teamOne)))
 			// WHOS TURN IS IT?
@@ -78,16 +78,18 @@ const game = {
 			// CAN YOU PRESS DONE?
 			var canDone = game.currentPlayer.guesses > 0 ? 'yes' : ''
 			// ARE YOU REAL?
-			p.socket ?
+			if (p.sockets[0]){
 			// SEND THE UPDATE
-			p.socket.emit('gameUpdate', 
-		{'turn': turn,
-		 'whosTurn': whosTurn,
-		 'colors' : updateColors(p),
-		 'codeText': codeText,
-		 'id': p.role,
-		 'canDone': canDone
-			}) :{};
+			for (var socket of p.sockets){
+				socket.emit('gameUpdate', 
+					{'turn': turn,
+					 'whosTurn': whosTurn,
+					 'colors' : updateColors(p),
+					 'codeText': codeText,
+					 'id': p.role,
+					 'canDone': canDone
+						}) 
+			}};
 		});
 		
 		console.log('TURN: '+
@@ -96,15 +98,17 @@ const game = {
 				   )
 	},
 	
-	isTurn: function(sock, data){
+	isTurn: function(sock){
 		var isTurn = false;
-		game.playerList.forEach(function(p){
-			if(p.socket)
+		for(var p of game.playerList){
+			if(p.sockets[0])
 			{
-				if (p.socket.id === sock.id){
-				isTurn = ((game.isCode === (p.role === 'code')) && (game.isTeamOne === (p.team === game.teamOne)))}
+				for (var socket of p.sockets){
+					if (socket.id === sock.id){
+						isTurn = ((game.isCode === (p.role === 'code')) && (game.isTeamOne === (p.team === game.teamOne)))}
+				}
 			}
-		});
+		};
 		return isTurn
 	},
 
@@ -146,10 +150,14 @@ const game = {
 	end: function(winner){
 		console.log('GAME OVER')
 		if(!winner){game.turn('gameOver'); game.end(game.isTeamOne?game.teamOne.name:game.teamTwo.name)}
-		else( game.playerList.forEach(p=>{
-			game.colorArray.forEach(c=>c.revealed = false);
-			p.socket ? p.socket.emit('gameUpdate', {'end': 'TEAM ' + winner.toUpperCase()+ ' WINS!', 'colors': game.colorArray}) : {}
-			}),
+		else(
+			game.colorArray.forEach(c=>c.revealed = false),
+			game.playerList.forEach(p=>{
+			if (p.sockets[0]){
+				for(var socket of p.sockets){
+					socket.emit('gameUpdate', {'end': 'TEAM ' + winner.toUpperCase()+ ' WINS!', 'colors': game.colorArray})
+				}
+			}}),
 			 game.over = true
 			)
 		},
@@ -161,10 +169,10 @@ const game = {
 	colorArray: [],
 };
 
-game.playerList = [{team: game.teamOne, role:'code', socket: undefined},
-				   {team: game.teamOne, role:'oper', socket: undefined},
-				   {team: game.teamTwo, role:'code', socket: undefined},
-				   {team: game.teamTwo, role:'oper', socket: undefined}];
+game.playerList = [{team: game.teamOne, role:'code', sockets: []},
+				   {team: game.teamOne, role:'oper', sockets: []},
+				   {team: game.teamTwo, role:'code', sockets: []},
+				   {team: game.teamTwo, role:'oper', sockets: []}];
 
 const card = {
 	
@@ -225,12 +233,14 @@ exports.playerAdd = function(pl, sock){
 	
 	game.playerList.forEach(function(p){
 		// CLEAR THIS SOCKET FROM PLAYERLIST
-		p.socket === sock 
-			? p.socket = undefined : {};
+		for(var socket of p.sockets){
+			socket === sock 
+			? socket = undefined : {};
+		}
 		// FIND REQUESTED ROLE/TEAM
 		if (p.team.name == player.team && p.role == player.role){
 			// SAVE SOCKET
-			p.socket = sock;
+			p.sockets.push(sock);
 			// DECIDE WHAT COLORS TO SEND
 			var colors = updateColors(p);
 			// SEND IT BACK
@@ -249,25 +259,27 @@ exports.playerAdd = function(pl, sock){
 };
 
 exports.gameAction = function(data, sock){
-if(game.isTurn(sock, data)){
-	console.log(data)
-	if(data.code){
-		game.currentPlayer.code = data.code;
-		game.currentPlayer.maxGuesses = data.guesses;
-		console.log('Code: '+game.currentPlayer.code+' '+game.currentPlayer.maxGuesses)
-		game.turn('Gave code');
-	}
-	else if (data === 'done'){
-		game.currentPlayer.guesses > 0 ?
-		game.turn('Player done') :
-		game.gameUpdate('NOT DONE');
-	}
-	else if(typeof(data.cardID) === 'number'){
-		console.log('GUESSED: '+game.wordArray[data.cardID]+', color was: '+game.colorArray[data.cardID].color)
-		game.winCheck(game.colorArray[data.cardID]);
-	}
-	else game.gameUpdate()
-} else console.log(
-		sock.id + ' sent an action NOT ON THEIR TURN.'
-	)	
+	if(game.isTurn(sock)){
+		console.log(data)
+		if(data.code){
+			game.currentPlayer.code = `${data.code} ${data.guesses}`;
+			game.currentPlayer.guesses = 0;
+			game.currentPlayer.maxGuesses = data.guesses === '0' ? 25 : data.guesses;
+			console.log('Code: '+game.currentPlayer.code)
+			console.log('Max guesses: '+ game.currentPlayer.maxGuesses)
+			game.turn('Gave code');
+		}
+		else if (data === 'done'){
+			game.currentPlayer.guesses > 0 ?
+			game.turn('Player done') :
+			game.gameUpdate('NOT DONE');
+		}
+		else if(typeof(data.cardID) === 'number'){
+			console.log('GUESSED: '+game.wordArray[data.cardID]+', color was: '+game.colorArray[data.cardID].color)
+			game.winCheck(game.colorArray[data.cardID]);
+		}
+		else game.gameUpdate()
+	} else console.log(
+			sock.id + ' sent an action NOT ON THEIR TURN.'
+		)	
 }
