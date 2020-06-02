@@ -1,12 +1,12 @@
 let https = require('https');
 
-const cp = {
+const game = {
+
+	currentPlayer : {
 		code: '',
 		guesses: 0,
 		maxGuesses: 0
-	};
-
-const game = {
+	},
 	
 	reset: function(){
 		game.isCode = true;
@@ -56,7 +56,7 @@ const game = {
 		
 		game.isCode ? game.isTeamOne = !game.isTeamOne : {};
 		
-		game.isCode ? (cp.maxGuesses = 0, cp.guesses = 0, cp.code = '') : {}
+		game.isCode ? (game.currentPlayer.maxGuesses = 0, game.currentPlayer.guesses = 0, game.currentPlayer.code = '') : {}
 		
 		game.gameUpdate(info)
 		
@@ -67,7 +67,7 @@ const game = {
 		// SEND EVERY CONNECTED PLAYER AN UPDATE
 		game.playerList.forEach(function(p){
 			// BUILD CURRENT CODE TEXT
-			if(!game.isCode){var codeText = cp.code+' '+ cp.maxGuesses} else cp.code = '';
+			if(!game.isCode){var codeText = game.currentPlayer.code+' '+ game.currentPlayer.maxGuesses} else game.currentPlayer.code = '';
 			// IS IT YOUR TURN?
 			var turn = ((game.isCode === (p.role === 'code')) && (game.isTeamOne === (p.team ===  game.teamOne)))
 			// WHOS TURN IS IT?
@@ -76,7 +76,7 @@ const game = {
 							game.teamTwo.name.toUpperCase()+"'s ") + 
 							(game.isCode ? 'CodeMaster' : "Operative")
 			// CAN YOU PRESS DONE?
-			var canDone = cp.guesses > 0 ? 'yes' : ''
+			var canDone = game.currentPlayer.guesses > 0 ? 'yes' : ''
 			// ARE YOU REAL?
 			p.socket ?
 			// SEND THE UPDATE
@@ -114,7 +114,7 @@ const game = {
 			{return game.gameUpdate('Card already picked')}
 		else{theCard.revealed = true}
 		// INCREASE THE GUESSES
-		cp.guesses++;
+		game.currentPlayer.guesses++;
 		
 		var team1 = 0;
 		var team2 = 0;
@@ -135,7 +135,7 @@ const game = {
 				// RIGHT CHOICE and MORE GUESSES?
 				var rightChoice = '';
 				game.isTeamOne ? rightChoice = game.teamOne.color : rightChoice = game.teamTwo.color;
-				(c.color === rightChoice && cp.guesses <= cp.maxGuesses) ?
+				(c.color === rightChoice && game.currentPlayer.guesses <= game.currentPlayer.maxGuesses) ?
 				// KEEP GOING
 				game.gameUpdate('RIGHT CHOICE'):
 				// ELSE, NEXT PLAYER
@@ -252,13 +252,13 @@ exports.gameAction = function(data, sock){
 if(game.isTurn(sock, data)){
 	console.log(data)
 	if(data.code){
-		cp.code = data.code;
-		cp.maxGuesses = data.guesses;
-		console.log('Code: '+cp.code+' '+cp.maxGuesses)
+		game.currentPlayer.code = data.code;
+		game.currentPlayer.maxGuesses = data.guesses;
+		console.log('Code: '+game.currentPlayer.code+' '+game.currentPlayer.maxGuesses)
 		game.turn('Gave code');
 	}
 	else if (data === 'done'){
-		cp.guesses > 0 ?
+		game.currentPlayer.guesses > 0 ?
 		game.turn('Player done') :
 		game.gameUpdate('NOT DONE');
 	}

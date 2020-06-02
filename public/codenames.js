@@ -161,8 +161,12 @@ $('.cardField')
 		board.turn = false;
 	}
 })
-	.on('click', '.back', function(event){
-		
+	.on('mouseenter', '.back', function(event){
+		console.log(event)
+		const card = $(this).closest('.card-wrapper');
+
+		card.removeClass('revealed')
+			.on('mouseleave', ()=>{card.addClass('revealed')})
 });
 
 // THE SUBMIT CODE BUTTON
@@ -171,44 +175,55 @@ $('#submitCode')
 
 		var code = $('#code').val();
 		var guesses = $('#guesses').val();
-// IF THE CODE AND # GUESSES ARE VALID
+
+		// IF THE CODE AND # GUESSES ARE VALID
+
 		if(guesses !== "" && board.turn){
+
 					// CLEAR THE CODE AND GUESSES BOX
+
 					$('#code').add('#guesses').val('');
+
 					// SEND THE CODE TO THE SERVER
+
 					socket.emit('gameAction', {'code': code, 'guesses': guesses});
+
 					// SIT BACK AND RELAX
+
 					board.turn = false;
+
 		// ADD CSS FOR AN ERROR
+
 		} else $('#guesses').addClass('error');
 		
 	});
 
 // CLEAR CSS WHEN CHANGING GUESSES
+
 $('#guesses')
 	.change(f=>$('#guesses').removeClass('error'));
 
 $('#codeDone')
-	.click(function(){
+	.click(f=>{
 		socket.emit('gameAction', 'done')
-	})
-$('.back').on('click')
+	});
 
 $(window).resize(board.resizeText);
 
 menu.start();
 
 socket.on('gameUpdate', function(data){
+	// IF ITS GAME OVER
 	if(data.end !== undefined){
 		$('#gameHeader').html('<span>'+data.end+'</span>').textfill({maxFontPixels: 96});
 		board.gameOver = true;
 		board.colors = data.colors;
 		board.update()
 	} else(
-	board.turn = data.turn,
-	board.colors = data.colors,
-	board.id = data.id,
-	$('#currentPlayer').text(board.turn?'YOU':data.whosTurn),
-	(data.turn && data.canDone === 'yes') ? $('#codeDone').show() : $('#codeDone').hide(),
-	board.update(data.codeText)
+		board.turn = data.turn,
+		board.colors = data.colors,
+		board.id = data.id,
+		$('#currentPlayer').text(board.turn?'YOU':data.whosTurn),
+		(data.turn && data.canDone === 'yes') ? $('#codeDone').show() : $('#codeDone').hide(),
+		board.update(data.codeText)
 )})
