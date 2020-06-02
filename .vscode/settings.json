@@ -1,8 +1,0 @@
-{
-    "appService.zipIgnorePattern": [
-        "node_modules{,/**}",
-        ".vscode{,/**}"
-    ],
-    "appService.defaultWebAppToDeploy": "/subscriptions/986e3fa7-c36e-4be2-83de-40de6ee87e08/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/amsel-codenames",
-    "appService.deploySubpath": ""
-}
