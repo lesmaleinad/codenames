@@ -30,7 +30,7 @@ Operatives must make at least one guess before finishing their turn.
 The Codemaster can give two special guess amounts:
 * **0:** This means that the word given is strictly **not** related to any of the correct cards on the table. Operatives are allowed unlimited guesses.
 
-* **Unlimited:** This means that the Operatives should freely guess anything they think could be right. This is useful if there is a backlog of guesses they want to make from other rounds, but the Codemaster still wants to give them a word to guess with as well. In the app, this can be express as giving '99' guesses.
+* **Unlimited:** This means that the Operatives should freely guess anything they think could be right. This is useful if there is a backlog of guesses they want to make from other rounds, but the Codemaster still wants to give them a word to guess with as well. In the app, this can be expressed by giving '99' guesses.
 
 ### End of Game
 
